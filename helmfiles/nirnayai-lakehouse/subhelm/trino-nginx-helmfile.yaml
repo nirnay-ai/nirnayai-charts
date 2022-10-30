@@ -6,8 +6,6 @@ releases:
 - name: trino-nginx
   chart: incubator/raw
   namespace: hai-trino
-  wait: true
-  waitForJobs: true
   values:
   - resources:
     - apiVersion: v1
