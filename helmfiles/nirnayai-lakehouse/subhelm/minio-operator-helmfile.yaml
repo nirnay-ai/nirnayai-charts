@@ -1,0 +1,11 @@
+releases:
+
+  - name: minio-operator
+    namespace: minio-operator
+    chart: minio/operator
+    wait: true
+    waitForJobs: true
+
+repositories:
+  - name: minio
+    url: https://operator.min.io/
