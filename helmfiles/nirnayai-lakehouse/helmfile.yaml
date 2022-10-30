@@ -1,0 +1,178 @@
+environments:
+  default:
+    values:
+    - values.yaml
+
+helmfiles:
+  - subhelm/minio-operator-helmfile.yaml
+  - subhelm/trino-nginx-helmfile.yaml
+
+releases:
+  - name: hai-mongodb
+    namespace: hai-mongodb
+    chart: bitnami/mongodb
+    wait: true
+    waitForJobs: true
+    set:
+    - name: architecture
+      value: replicaset
+    - name: replicaCount
+      value: 2
+
+  - name: minio-tenant
+    namespace: hai-minio
+    chart: minio/tenant
+    wait: true
+    waitForJobs: true
+    set:
+      - name: secrets.accessKey
+        value: {{ .Values.accessKey }}
+      - name: secrets.secretKey
+        value: {{ .Values.secretKey }}
+      - name: tenant.pools[0].server
+        value: 4
+      - name: tenant.pools[0].volumesPerServer
+        value: 4
+      - name: tenant.certificate.requestAutoCert
+        value: false
+      - name: log.db.volumeClaimTemplate.spec.storageClassName
+        value: ""
+      - name: tenant.log.audit.diskCapacityGB
+        value: false
+      - name: tenant.prometheus.diskCapacityGB
+        value: false
+
+  - name: hive-metastore
+    namespace: hai-trino
+    chart: saikiran2603/hive-metastore
+    wait: true
+    waitForJobs: true
+    set:
+      - name: s3.endpoint
+        value: "http://minio.hai-minio:80"
+      - name: s3.accessKey
+        value: {{ .Values.accessKey }}
+      - name: s3.secretKey
+        value: {{ .Values.secretKey }}
+      - name: s3.warehouseBucket
+        value: "lakehouse-structured"
+
+  - name: hai-trino
+    namespace: hai-trino
+    chart: valeriano-manassero/trino
+    wait: true
+    waitForJobs: true
+    values:
+      - auth:
+          passwordAuth: "admin:$2y$10$42r4mc4Dv/ujHdTa.NYwdeyad9Yx16JyD2uwDIc.eRvdXmJ.2Dia6"
+        connectors:
+          hive.properties: |-
+            connector.name=hive
+            hive.allow-drop-table=true
+            hive.metastore.uri=thrift://hive-metastore:9083
+            hive.s3.aws-access-key={{ .Values.accessKey }}
+            hive.s3.aws-secret-key={{ .Values.secretKey }}
+            hive.s3.endpoint=minio.hai-minio:80
+            hive.s3.ssl.enabled=false
+            hive.s3.path-style-access=true
+            hive.non-managed-table-writes-enabled=true
+            hive.s3select-pushdown.enabled=true
+            hive.timestamp-precision=NANOSECONDS
+    set:
+      - name: image.repository
+        value: 'trinodb/trino'
+      - name: image.tag
+        value: 'latest'
+      - name: worker.replicas
+        value: 3
+      - name: worker.autoscaler.enabled
+        value: true
+      - name: worker.autoscaler.maxReplicas
+        value: 5
+      - name: worker.autoscaler.targetCPUUtilizationPercentage
+        value: 50
+      - name: config.general.processForwarded
+        value: true
+      - name: config.general.authenticationType
+        value: "PASSWORD"
+      - name: config.general.internalCommunicationSharedSecret
+        value: "test123"
+      - name: ingress.enabled
+        value: false
+
+  - name: loki
+    namespace: loki
+    chart: grafana/loki-stack
+    wait: true
+    waitForJobs: true
+#    version: 2.6.0
+    set:
+      - name: fluent-bit.enabled
+        value: true
+      - name: promtail.enabled
+        value: false
+      - name: grafana.enabled
+        value: true
+      - name: prometheus.enabled
+        value: true
+      - name: prometheus.alertmanager.persistentVolume.enabled
+        value: true
+      - name: prometheus.server.persistentVolume.enabled
+        value: true
+
+  - name: superset
+    namespace: hai-superset
+    chart: superset/superset
+    wait: true
+    waitForJobs: true
+    values:
+      - bootstrapScript: |
+          #!/bin/bash
+          pip install clickhouse-driver>=0.2.0 \
+            clickhouse-sqlalchemy>=0.1.6 \
+            sqlalchemy-trino && \
+          if [ ! -f ~/bootstrap ]; then echo "Running Superset with uid 0" > ~/bootstrap; fi
+      - extraConfigs:
+          import_datasources.yaml: |
+            databases:
+            - allow_file_upload: true
+              allow_ctas: true
+              allow_cvas: true
+              database_name: lakehouse
+              sqlalchemy_uri: trino://admin:admin@trino.nirnay.com:443/hive/default
+              tables: []
+              extra: "{\"engine_params\": {\"connect_args\": {\"verify\": false}}}"
+
+      - ingress:
+          enabled: true
+          ingressClassName: nginx
+          annotations:
+            # kubernetes.io/tls-acme: "true"
+            # Extend timeout to allow long running queries.
+             nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+             nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+             nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+          path: /
+          pathType: ImplementationSpecific
+          hosts:
+            - superset.nirnay.com
+          tls: []
+
+repositories:
+  - name: mongodb
+    url: https://charts.bitnami.com/bitnami
+
+  - name: minio
+    url: https://operator.min.io/
+
+  - name: saikiran2603
+    url: https://saikiran2603.github.io/helm-charts
+
+  - name: valeriano-manassero
+    url: https://valeriano-manassero.github.io/helm-charts
+
+  - name: grafana
+    url: https://grafana.github.io/helm-charts
+
+  - name: superset
+    url: https://apache.github.io/superset
