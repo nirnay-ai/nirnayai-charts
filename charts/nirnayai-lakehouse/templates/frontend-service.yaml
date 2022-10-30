@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ui-connections
+  namespace: {{ .Values.platform_namespace }}
+  labels:
+    app: ui-connections
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+  selector:
+    app: ui-connections
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ui-container
+  namespace: {{ .Values.platform_namespace }}
+  labels:
+    app: ui-container
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+  selector:
+    app: ui-container
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ui-datakpis
+  namespace: {{ .Values.platform_namespace }}
+  labels:
+    app: ui-datakpis
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+  selector:
+    app: ui-datakpis
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ui-datamodels
+  namespace: {{ .Values.platform_namespace }}
+  labels:
+    app: ui-datamodels
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+  selector:
+    app: ui-datamodels
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ui-dataviewscollections
+  namespace: {{ .Values.platform_namespace }}
+  labels:
+    app: ui-dataviewscollections
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+  selector:
+    app: ui-dataviewscollections
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ui-sqleditor
+  namespace: {{ .Values.platform_namespace }}
+  labels:
+    app: ui-sqleditor
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+  selector:
+    app: ui-sqleditor

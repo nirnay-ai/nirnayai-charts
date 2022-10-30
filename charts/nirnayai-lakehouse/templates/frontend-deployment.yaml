@@ -1,0 +1,138 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ui-connections
+  namespace: {{ .Values.platform_namespace }}
+  labels:
+    app: ui-connections
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ui-connections
+  template:
+    metadata:
+      labels:
+        app: ui-connections
+    spec:
+      containers:
+        - name: ui-connections
+          image: "{{ .Values.registryCredentials.registryServer }}/ui-connections:{{ .Values.registryCredentials.tag }}"
+          ports:
+            - containerPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ui-container
+  namespace: {{ .Values.platform_namespace }}
+  labels:
+    app: ui-container
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ui-container
+  template:
+    metadata:
+      labels:
+        app: ui-container
+    spec:
+      containers:
+        - name: ui-container
+          image: "{{ .Values.registryCredentials.registryServer }}/ui-container:{{ .Values.registryCredentials.tag }}"
+          ports:
+            - containerPort: 3000
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ui-datakpis
+  namespace: {{ .Values.platform_namespace }}
+  labels:
+    app: ui-datakpis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ui-datakpis
+  template:
+    metadata:
+      labels:
+        app: ui-datakpis
+    spec:
+      containers:
+        - name: ui-datakpis
+          image: "{{ .Values.registryCredentials.registryServer }}/ui-datakpis:{{ .Values.registryCredentials.tag }}"
+          ports:
+            - containerPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ui-datamodels
+  namespace: {{ .Values.platform_namespace }}
+  labels:
+    app: ui-datamodels
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ui-datamodels
+  template:
+    metadata:
+      labels:
+        app: ui-datamodels
+    spec:
+      containers:
+        - name: ui-datamodels
+          image: "{{ .Values.registryCredentials.registryServer }}/ui-datamodels:{{ .Values.registryCredentials.tag }}"
+          ports:
+            - containerPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ui-dataviewscollections
+  namespace: {{ .Values.platform_namespace }}
+  labels:
+    app: ui-dataviewscollections
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ui-dataviewscollections
+  template:
+    metadata:
+      labels:
+        app: ui-dataviewscollections
+    spec:
+      containers:
+        - name: ui-dataviews
+          image: "{{ .Values.registryCredentials.registryServer }}/ui-dataviewscollections:{{ .Values.registryCredentials.tag }}"
+          ports:
+            - containerPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ui-sqleditor
+  namespace: {{ .Values.platform_namespace }}
+  labels:
+    app: ui-sqleditor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ui-sqleditor
+  template:
+    metadata:
+      labels:
+        app: ui-sqleditor
+    spec:
+      containers:
+        - name: ui-dataviews
+          image: "{{ .Values.registryCredentials.registryServer }}/ui-sqleditor:{{ .Values.registryCredentials.tag }}"
+          ports:
+            - containerPort: 3000

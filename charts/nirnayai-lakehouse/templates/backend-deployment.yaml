@@ -1,0 +1,130 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-data-sources
+  namespace: {{ .Values.platform_namespace }}
+  labels:
+    app: api-data-sources
+spec:
+ replicas: 1
+ selector:
+   matchLabels:
+     app: api-data-sources
+ template:
+    metadata:
+      labels:
+        app: api-data-sources
+    spec:
+      serviceAccountName: hai-service-account
+      containers:
+      - name: api-data-sources
+        image: "{{ .Values.registryCredentials.registryServer }}/api-data-sources:{{ .Values.registryCredentials.tag }}"
+        ports:
+        - containerPort: 8080
+        env:
+          - name: mongodb_server
+            value: "hai-mongodb-0.hai-mongodb-headless.hai-mongodb.svc.cluster.local:27017,hai-mongodb-1.hai-mongodb-headless.hai-mongodb.svc.cluster.local:27017"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-lakehouse
+  namespace: {{ .Values.platform_namespace }}
+  labels:
+    app: api-lakehouse
+spec:
+ replicas: 1
+ selector:
+   matchLabels:
+     app: api-lakehouse
+ template:
+    metadata:
+      labels:
+        app: api-lakehouse
+    spec:
+      serviceAccountName: hai-service-account
+      containers:
+      - name: api-lakehouse
+        image: "{{ .Values.registryCredentials.registryServer }}/api-lakehouse:{{ .Values.registryCredentials.tag }}"
+        ports:
+        - containerPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-log-manager
+  namespace: {{ .Values.platform_namespace }}
+  labels:
+    app: api-log-manager
+spec:
+ replicas: 1
+ selector:
+   matchLabels:
+     app: api-log-manager
+ template:
+    metadata:
+      labels:
+        app: api-log-manager
+    spec:
+      serviceAccountName: hai-service-account
+      containers:
+      - name: api-log-manager
+        image: "{{ .Values.registryCredentials.registryServer }}/api-log-manager:{{ .Values.registryCredentials.tag }}"
+        ports:
+        - containerPort: 8080
+        env:
+          - name: logging_backend
+            value: "loki"
+          - name: logging_server
+            value: "loki.loki:3100"
+          - name: elasticsearch_version
+            value: ""
+          - name: elasticsearch_index
+            value: ""
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "250m"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-scheduler
+  namespace: {{ .Values.platform_namespace }}
+  labels:
+    app: service-scheduler
+spec:
+ replicas: 1
+ selector:
+   matchLabels:
+     app: service-scheduler
+ template:
+    metadata:
+      labels:
+        app: service-scheduler
+    spec:
+      serviceAccountName: hai-service-account
+      containers:
+      - name: service-scheduler
+        image: "{{ .Values.registryCredentials.registryServer }}/service-scheduler:{{ .Values.registryCredentials.tag }}"
+        ports:
+        - containerPort: 8080
+        env:
+          - name: mongodb_server
+            value: "hai-mongodb-0.hai-mongodb-headless.hai-mongodb.svc.cluster.local:27017,hai-mongodb-1.hai-mongodb-headless.hai-mongodb.svc.cluster.local:27017"
+          - name: docker_registry
+            value: {{ .Values.registryCredentials.registryServer }}
+          - name: version
+            value: {{ .Values.registryCredentials.tag }}
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "250m"

@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hai-ingress
+  namespace: {{ .Values.platform_namespace }}
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: {{ .Values.ingress_details.platform.ingress_host_name }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ui-container
+                port:
+                  number: 3000
+  tls:
+    - hosts:
+        - {{ .Values.ingress_details.platform.ingress_host_name }}
+      secretName: {{ .Values.ingress_details.platform.tls_secret_name }}
