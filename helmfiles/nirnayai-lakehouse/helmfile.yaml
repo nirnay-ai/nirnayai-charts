@@ -158,6 +158,12 @@ releases:
             - superset.nirnay.com
           tls: []
 
+  - name: lakehouse
+    namespace: hai-platform
+    chart: nirnayai-charts/nirnayai-lakehouse
+    wait: true
+    waitForJobs: true
+
 repositories:
   - name: mongodb
     url: https://charts.bitnami.com/bitnami
@@ -176,3 +182,6 @@ repositories:
 
   - name: superset
     url: https://apache.github.io/superset
+
+  - name: nirnayai-charts
+    url: https://nirnay-ai.github.io/nirnayai-charts/
