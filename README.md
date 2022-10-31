@@ -5,7 +5,7 @@
 
 Download latest release tarzip from below location 
 
-    wget https://github.com/helmfile/helmfile/releases/download/v0.147.0/helmfile_0.147.0_linux_amd64.tar.g
+    wget https://github.com/helmfile/helmfile/releases/download/v0.147.0/helmfile_0.147.0_linux_amd64.tar.gz
 
 Unzip the tar file 
 
