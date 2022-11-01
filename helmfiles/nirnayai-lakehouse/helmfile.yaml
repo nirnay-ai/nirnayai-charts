@@ -2,17 +2,19 @@ environments:
   default:
     values:
     - values.yaml
+---
 
 helmfiles:
-  - subhelm/minio-operator-helmfile.yaml
-  - subhelm/trino-nginx-helmfile.yaml
+  - path: subhelm/minio-operator-helmfile.yaml
+    values:
+      - minio:
+          enabled: {{ .Values.minio.enabled }}
+  - path: subhelm/trino-nginx-helmfile.yaml
 
 releases:
   - name: hai-mongodb
     namespace: hai-mongodb
     chart: bitnami/mongodb
-    wait: true
-    waitForJobs: true
     set:
     - name: architecture
       value: replicaset
@@ -22,13 +24,14 @@ releases:
   - name: minio-tenant
     namespace: hai-minio
     chart: minio/tenant
+    condition: minio.enabled
     wait: true
     waitForJobs: true
     set:
       - name: secrets.accessKey
-        value: {{ .Values.accessKey }}
+        value: {{ .Values.storage_config.accessKey }}
       - name: secrets.secretKey
-        value: {{ .Values.secretKey }}
+        value: {{ .Values.storage_config.secretKey }}
       - name: tenant.pools[0].server
         value: 4
       - name: tenant.pools[0].volumesPerServer
@@ -45,23 +48,23 @@ releases:
   - name: hive-metastore
     namespace: hai-trino
     chart: saikiran2603/hive-metastore
-    wait: true
-    waitForJobs: true
     set:
       - name: s3.endpoint
-        value: "http://minio.hai-minio:80"
+          {{ if eq .Values.minio.enabled true }}
+        value: "http://{{.Values.minio.server}}"
+          {{ else }}
+        value: "https://{{ .Values.s3.server }}"
+          {{ end }}
       - name: s3.accessKey
-        value: {{ .Values.accessKey }}
+        value: {{ .Values.storage_config.accessKey }}
       - name: s3.secretKey
-        value: {{ .Values.secretKey }}
+        value: {{ .Values.storage_config.secretKey }}
       - name: s3.warehouseBucket
-        value: "lakehouse-structured"
+        value: {{ .Values.storage_config.storage_bucket_structured }}
 
   - name: hai-trino
     namespace: hai-trino
     chart: valeriano-manassero/trino
-    wait: true
-    waitForJobs: true
     values:
       - auth:
           passwordAuth: "admin:$2y$10$42r4mc4Dv/ujHdTa.NYwdeyad9Yx16JyD2uwDIc.eRvdXmJ.2Dia6"
@@ -70,10 +73,15 @@ releases:
             connector.name=hive
             hive.allow-drop-table=true
             hive.metastore.uri=thrift://hive-metastore:9083
-            hive.s3.aws-access-key={{ .Values.accessKey }}
-            hive.s3.aws-secret-key={{ .Values.secretKey }}
-            hive.s3.endpoint=minio.hai-minio:80
+            hive.s3.aws-access-key={{ .Values.storage_config.accessKey }}
+            hive.s3.aws-secret-key={{ .Values.storage_config.secretKey }}
+              {{ if eq .Values.minio.enabled true }}
+            hive.s3.endpoint="{{.Values.minio.server}}"
             hive.s3.ssl.enabled=false
+              {{ else }}
+            hive.s3.endpoint="{{.Values.s3.server}}"
+            hive.s3.ssl.enabled=true
+              {{ end }}
             hive.s3.path-style-access=true
             hive.non-managed-table-writes-enabled=true
             hive.s3select-pushdown.enabled=true
@@ -103,9 +111,6 @@ releases:
   - name: loki
     namespace: loki
     chart: grafana/loki-stack
-    wait: true
-    waitForJobs: true
-#    version: 2.6.0
     set:
       - name: fluent-bit.enabled
         value: true
@@ -123,8 +128,6 @@ releases:
   - name: superset
     namespace: hai-superset
     chart: superset/superset
-    wait: true
-    waitForJobs: true
     values:
       - bootstrapScript: |
           #!/bin/bash
@@ -159,17 +162,31 @@ releases:
           tls: []
 
   - name: lakehouse
-    namespace: hai-platform
     chart: nirnayai-charts/nirnayai-lakehouse
-    wait: true
-    waitForJobs: true
+    values:
+      - platform_namespace: hai-platform
+      - workers_namespace: hai-workers
+      - registryCredentials:
+          registryServer: "{{ .Values.lakehouse.registry }}"
+          tag: "{{ .Values.lakehouse.tag }}"
+          username: "{{ .Values.lakehouse.docker_user_name }}"
+          password: "{{ .Values.lakehouse.docker_password }}"
+      - storage_config:
+          storage_server: {{ .Values.minio.enabled | ternary .Values.minio.server .Values.s3.server | quote }}
+          storage_access_key: "{{ .Values.storage_config.accessKey }}"
+          storage_secret_key: "{{ .Values.storage_config.secretKey }}"
+          storage_backend: {{ .Values.minio.enabled | ternary "minio" "s3" | quote }}
+          storage_bucket_structured: "{{ .Values.storage_config.storage_bucket_structured }}"
+          storage_bucket_unstructured: "{{ .Values.storage_config.storage_bucket_unstructured }}"
+          storage_bucket_notebooks: "{{ .Values.storage_config.storage_bucket_notebooks }}"
+      - ingress_details:
+          platform:
+            ingress_host_name: {{ .Values.ingress.app_host_name }}
+            tls_secret_name: {{ .Values.ingress.tls_secret_name }}
 
 repositories:
   - name: mongodb
     url: https://charts.bitnami.com/bitnami
-
-  - name: minio
-    url: https://operator.min.io/
 
   - name: saikiran2603
     url: https://saikiran2603.github.io/helm-charts
@@ -185,3 +202,6 @@ repositories:
 
   - name: nirnayai-charts
     url: https://nirnay-ai.github.io/nirnayai-charts/
+
+  - name: minio
+    url: https://operator.min.io/
