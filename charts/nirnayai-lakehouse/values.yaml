@@ -30,6 +30,7 @@ storage_config:
 
 
 ingress_details:
+  enabled: false
   platform:
     ingress_host_name: app.nirnay.com
     tls_secret_name: app-tls-secret
