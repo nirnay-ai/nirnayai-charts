@@ -18,7 +18,7 @@ spec:
       serviceAccountName: hai-service-account
       containers:
       - name: api-data-sources
-        image: "{{ .Values.registryCredentials.registryServer }}/api-data-sources:{{ .Values.registryCredentials.tag }}"
+        image: "{{ .Values.registryCredentials.registry }}/api-data-sources:{{ .Values.registryCredentials.tag }}"
         ports:
         - containerPort: 8080
         env:
@@ -46,7 +46,7 @@ spec:
       serviceAccountName: hai-service-account
       containers:
       - name: api-lakehouse
-        image: "{{ .Values.registryCredentials.registryServer }}/api-lakehouse:{{ .Values.registryCredentials.tag }}"
+        image: "{{ .Values.registryCredentials.registry }}/api-lakehouse:{{ .Values.registryCredentials.tag }}"
         ports:
         - containerPort: 8080
 
@@ -71,7 +71,7 @@ spec:
       serviceAccountName: hai-service-account
       containers:
       - name: api-log-manager
-        image: "{{ .Values.registryCredentials.registryServer }}/api-log-manager:{{ .Values.registryCredentials.tag }}"
+        image: "{{ .Values.registryCredentials.registry }}/api-log-manager:{{ .Values.registryCredentials.tag }}"
         ports:
         - containerPort: 8080
         env:
@@ -111,7 +111,7 @@ spec:
       serviceAccountName: hai-service-account
       containers:
       - name: service-scheduler
-        image: "{{ .Values.registryCredentials.registryServer }}/service-scheduler:{{ .Values.registryCredentials.tag }}"
+        image: "{{ .Values.registryCredentials.registry }}/service-scheduler:{{ .Values.registryCredentials.tag }}"
         ports:
         - containerPort: 8080
         env:

@@ -14,7 +14,8 @@ platform_namespace: hai-platform
 workers_namespace: hai-workers
 
 registryCredentials:
-  registryServer: "localhost:32000"
+  registryServer: ""
+  registry: "localhost:32000"
   tag: "latest"
   username: "test"
   password: "test"

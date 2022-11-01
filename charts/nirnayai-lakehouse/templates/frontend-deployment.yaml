@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: ui-connections
-          image: "{{ .Values.registryCredentials.registryServer }}/ui-connections:{{ .Values.registryCredentials.tag }}"
+          image: "{{ .Values.registryCredentials.registry }}/ui-connections:{{ .Values.registryCredentials.tag }}"
           ports:
             - containerPort: 3000
 ---
@@ -40,7 +40,7 @@ spec:
     spec:
       containers:
         - name: ui-container
-          image: "{{ .Values.registryCredentials.registryServer }}/ui-container:{{ .Values.registryCredentials.tag }}"
+          image: "{{ .Values.registryCredentials.registry }}/ui-container:{{ .Values.registryCredentials.tag }}"
           ports:
             - containerPort: 3000
 
@@ -64,7 +64,7 @@ spec:
     spec:
       containers:
         - name: ui-datakpis
-          image: "{{ .Values.registryCredentials.registryServer }}/ui-datakpis:{{ .Values.registryCredentials.tag }}"
+          image: "{{ .Values.registryCredentials.registry }}/ui-datakpis:{{ .Values.registryCredentials.tag }}"
           ports:
             - containerPort: 3000
 ---
@@ -87,7 +87,7 @@ spec:
     spec:
       containers:
         - name: ui-datamodels
-          image: "{{ .Values.registryCredentials.registryServer }}/ui-datamodels:{{ .Values.registryCredentials.tag }}"
+          image: "{{ .Values.registryCredentials.registry }}/ui-datamodels:{{ .Values.registryCredentials.tag }}"
           ports:
             - containerPort: 3000
 ---
@@ -110,7 +110,7 @@ spec:
     spec:
       containers:
         - name: ui-dataviews
-          image: "{{ .Values.registryCredentials.registryServer }}/ui-dataviewscollections:{{ .Values.registryCredentials.tag }}"
+          image: "{{ .Values.registryCredentials.registry }}/ui-dataviewscollections:{{ .Values.registryCredentials.tag }}"
           ports:
             - containerPort: 3000
 ---
@@ -133,6 +133,6 @@ spec:
     spec:
       containers:
         - name: ui-dataviews
-          image: "{{ .Values.registryCredentials.registryServer }}/ui-sqleditor:{{ .Values.registryCredentials.tag }}"
+          image: "{{ .Values.registryCredentials.registry }}/ui-sqleditor:{{ .Values.registryCredentials.tag }}"
           ports:
             - containerPort: 3000
