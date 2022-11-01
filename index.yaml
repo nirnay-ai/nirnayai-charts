@@ -3,6 +3,16 @@ entries:
   nirnayai-lakehouse:
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2022-11-01T15:21:18.740204287Z"
+    description: A Helm chart for Kubernetes
+    digest: eb6b3ebc4979e801a64043d32d167eb44a1e94bf506bb746dc4b2d7180ad79c5
+    name: nirnayai-lakehouse
+    type: application
+    urls:
+    - https://github.com/nirnay-ai/nirnayai-charts/releases/download/nirnayai-lakehouse-0.1.3/nirnayai-lakehouse-0.1.3.tgz
+    version: 0.1.3
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2022-11-01T13:46:48.835095719Z"
     description: A Helm chart for Kubernetes
     digest: f78b473a48cc033bce44c928a588c07de50166dcfce0fdabc6bada1c6f83b512
@@ -31,4 +41,4 @@ entries:
     urls:
     - https://github.com/nirnay-ai/nirnayai-charts/releases/download/nirnayai-lakehouse-0.1.0/nirnayai-lakehouse-0.1.0.tgz
     version: 0.1.0
-generated: "2022-11-01T13:46:48.835107619Z"
+generated: "2022-11-01T15:21:18.740217687Z"
