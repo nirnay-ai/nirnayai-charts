@@ -118,7 +118,7 @@ spec:
           - name: mongodb_server
             value: "hai-mongodb-0.hai-mongodb-headless.hai-mongodb.svc.cluster.local:27017,hai-mongodb-1.hai-mongodb-headless.hai-mongodb.svc.cluster.local:27017"
           - name: docker_registry
-            value: {{ .Values.registryCredentials.registryServer }}
+            value: {{ .Values.registryCredentials.registry }}
           - name: version
             value: {{ .Values.registryCredentials.tag }}
         resources:
