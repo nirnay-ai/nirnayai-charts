@@ -115,9 +115,10 @@ releases:
       - platform_namespace: {{ .Values.lakehouse.app_namespace }}
       - workers_namespace: {{ .Values.lakehouse.worker_namespace }}
       - registryCredentials:
-          registryServer: "{{ .Values.lakehouse.registry }}"
+          registryServer: "{{ .Values.lakehouse.registryServer }}"
+          registry: "{{ .Values.lakehouse.registry }}"
           tag: "{{ .Values.lakehouse.tag }}"
-          username: "{{ .Values.lakehouse.docker_user_name }}"
+          username: "{{ .Values.lakehouse.docker_username }}"
           password: "{{ .Values.lakehouse.docker_password }}"
       - storage_config:
           storage_server: {{ .Values.minio.enabled | ternary .Values.lakehouse.storage.minio.server .Values.lakehouse.storage.s3.server | quote }}
