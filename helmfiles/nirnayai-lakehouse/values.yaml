@@ -3,21 +3,58 @@ lakehouse:
   tag: "latest"
   docker_user_name: "test"
   docker_password: "test"
+  app_namespace: hai-platform
+  worker_namespace: hai-workers
+  storage:
+    minio:
+      server: "minio.hai-minio:80"
+    s3:
+      server: "s3.amazonaws.com"
+    config:
+      storage_bucket_structured: "lakehouse-structured"
+      storage_bucket_unstructured: "lakehouse-unstructured"
+      storage_bucket_notebooks: "lakehouse-notebooks"
+      accessKey: "AKIAYFVPBHBUJBGZFQFX"
+      secretKey: "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"
+  ingress:
+    enabled: false
+    host_name: app.nirnay.com
+    tls_secret: tls-secret
 
 minio:
   enabled: false
-  server: "minio.hai-minio:80"
 
-s3:
-  server: "s3.amazonaws.com"
 
-storage_config:
-  storage_bucket_structured: "lakehouse-structured"
-  storage_bucket_unstructured: "lakehouse-unstructured"
-  storage_bucket_notebooks: "lakehouse-notebooks"
-  accessKey: "AKIAYFVPBHBUJBGZFQFX"
-  secretKey: "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"
+oauth2Proxy:
+  enabled: true
+  lakehouse:
+    ingress:
+        host_name: app.nirnay.com
+        tls_secret: app-secret
 
-ingress:
-  app_host_name: app.nirnay.com
-  tls_secret_name: app-tls-secret
+  oauth2ProxyValues:
+    config:
+      clientID: "dbf872b25c20124583a7"
+      clientSecret: "fe5739a3b07cabaa9ad17cc62c62f3ea8e0e9885"
+      cookieSecret: "-1-DzbWpd3Mqu47DrqeYPKDSbSlOuMK8RifaQW3Kcvw="
+
+    extraArgs:
+      provider: github
+      scope: "user:email"
+
+    image:
+      repository: "quay.io/oauth2-proxy/oauth2-proxy"
+      tag: "v7.2.1"
+      pullPolicy: "IfNotPresent"
+
+    ingress:
+      enabled: true
+      path: /oauth2
+      hosts:
+        - app.nirnay.com
+      annotations:
+        kubernetes.io/ingress.class: nginx
+      tls:
+        - secretName: oauth2-proxy-https-cert
+          hosts:
+            - app.nirnay.com

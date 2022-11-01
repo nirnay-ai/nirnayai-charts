@@ -29,9 +29,9 @@ releases:
     waitForJobs: true
     set:
       - name: secrets.accessKey
-        value: {{ .Values.storage_config.accessKey }}
+        value: {{ .Values.lakehouse.storage.config.accessKey }}
       - name: secrets.secretKey
-        value: {{ .Values.storage_config.secretKey }}
+        value: {{ .Values.lakehouse.storage.config.secretKey }}
       - name: tenant.pools[0].server
         value: 4
       - name: tenant.pools[0].volumesPerServer
@@ -51,16 +51,16 @@ releases:
     set:
       - name: s3.endpoint
           {{ if eq .Values.minio.enabled true }}
-        value: "http://{{.Values.minio.server}}"
+        value: "http://{{.Values.lakehouse.storage.minio.server}}"
           {{ else }}
-        value: "https://{{ .Values.s3.server }}"
+        value: "https://{{ .Values.lakehouse.storage.s3.server }}"
           {{ end }}
       - name: s3.accessKey
-        value: {{ .Values.storage_config.accessKey }}
+        value: {{ .Values.lakehouse.storage.config.accessKey }}
       - name: s3.secretKey
-        value: {{ .Values.storage_config.secretKey }}
+        value: {{ .Values.lakehouse.storage.config.secretKey }}
       - name: s3.warehouseBucket
-        value: {{ .Values.storage_config.storage_bucket_structured }}
+        value: {{ .Values.lakehouse.storage.config.storage_bucket_structured }}
 
   - name: hai-trino
     namespace: hai-trino
@@ -73,13 +73,13 @@ releases:
             connector.name=hive
             hive.allow-drop-table=true
             hive.metastore.uri=thrift://hive-metastore:9083
-            hive.s3.aws-access-key={{ .Values.storage_config.accessKey }}
-            hive.s3.aws-secret-key={{ .Values.storage_config.secretKey }}
+            hive.s3.aws-access-key={{ .Values.lakehouse.storage.config.accessKey }}
+            hive.s3.aws-secret-key={{ .Values.lakehouse.storage.config.secretKey }}
               {{ if eq .Values.minio.enabled true }}
-            hive.s3.endpoint="{{.Values.minio.server}}"
+            hive.s3.endpoint="{{.Values.lakehouse.storage.minio.server}}"
             hive.s3.ssl.enabled=false
               {{ else }}
-            hive.s3.endpoint="{{.Values.s3.server}}"
+            hive.s3.endpoint="{{.Values.lakehouse.storage.s3.server}}"
             hive.s3.ssl.enabled=true
               {{ end }}
             hive.s3.path-style-access=true
@@ -164,25 +164,65 @@ releases:
   - name: lakehouse
     chart: nirnayai-charts/nirnayai-lakehouse
     values:
-      - platform_namespace: hai-platform
-      - workers_namespace: hai-workers
+      - platform_namespace: {{ .Values.lakehouse.app_namespace }}
+      - workers_namespace: {{ .Values.lakehouse.worker_namespace }}
       - registryCredentials:
           registryServer: "{{ .Values.lakehouse.registry }}"
           tag: "{{ .Values.lakehouse.tag }}"
           username: "{{ .Values.lakehouse.docker_user_name }}"
           password: "{{ .Values.lakehouse.docker_password }}"
       - storage_config:
-          storage_server: {{ .Values.minio.enabled | ternary .Values.minio.server .Values.s3.server | quote }}
-          storage_access_key: "{{ .Values.storage_config.accessKey }}"
-          storage_secret_key: "{{ .Values.storage_config.secretKey }}"
+          storage_server: {{ .Values.minio.enabled | ternary .Values.lakehouse.storage.minio.server .Values.lakehouse.storage.s3.server | quote }}
+          storage_access_key: "{{ .Values.lakehouse.storage.config.accessKey }}"
+          storage_secret_key: "{{ .Values.lakehouse.storage.config.secretKey }}"
           storage_backend: {{ .Values.minio.enabled | ternary "minio" "s3" | quote }}
-          storage_bucket_structured: "{{ .Values.storage_config.storage_bucket_structured }}"
-          storage_bucket_unstructured: "{{ .Values.storage_config.storage_bucket_unstructured }}"
-          storage_bucket_notebooks: "{{ .Values.storage_config.storage_bucket_notebooks }}"
+          storage_bucket_structured: "{{ .Values.lakehouse.storage.config.storage_bucket_structured }}"
+          storage_bucket_unstructured: "{{ .Values.lakehouse.storage.config.storage_bucket_unstructured }}"
+          storage_bucket_notebooks: "{{ .Values.lakehouse.storage.config.storage_bucket_notebooks }}"
       - ingress_details:
+          enabled: {{ .Values.lakehouse.ingress.enabled }}
           platform:
-            ingress_host_name: {{ .Values.ingress.app_host_name }}
-            tls_secret_name: {{ .Values.ingress.tls_secret_name }}
+            ingress_host_name: {{ .Values.lakehouse.ingress.host_name }}
+            tls_secret_name: {{ .Values.lakehouse.ingress.tls_secret }}
+
+  - name: oauth2
+    chart: oauth2-proxy/oauth2-proxy
+    condition: oauth2Proxy.enabled
+    namespace: oauth
+    values:
+      - {{ toYaml .Values.oauth2Proxy.oauth2ProxyValues | nindent 8 }}
+
+  - name: oauth-app-ingress
+    chart: incubator/raw
+    namespace: "{{ .Values.lakehouse.app_namespace }}"
+    condition: oauth2Proxy.enabled
+    values:
+      - apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: hai-ingress
+          namespace: "{{ .Values.lakehouse.worker_namespace }}"
+          annotations:
+            nginx.ingress.kubernetes.io/auth-response-headers: X-Auth-Request-User,X-Auth-Request-Email
+            nginx.ingress.kubernetes.io/auth-url: "http://oauth-oauth2-proxy.oauth.svc.cluster.local:80/oauth2/auth"
+            nginx.ingress.kubernetes.io/auth-signin: "http://{{ .Values.oauth2Proxy.lakehouse.ingress.host_name }}/oauth2/start"
+        spec:
+          ingressClassName: nginx
+          rules:
+            - host: {{ .Values.oauth2Proxy.lakehouse.ingress.host_name }}
+              http:
+                paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: ui-container
+                        port:
+                          number: 3000
+          tls:
+            - hosts:
+                - {{ .Values.oauth2Proxy.lakehouse.ingress.host_name }}
+              secretName: {{ .Values.oauth2Proxy.lakehouse.ingress.tls_secret }}
 
 repositories:
   - name: mongodb
@@ -205,3 +245,9 @@ repositories:
 
   - name: minio
     url: https://operator.min.io/
+
+  - name: oauth2-proxy
+    url: https://oauth2-proxy.github.io/manifests/
+
+  - name: incubator
+    url: https://charts.helm.sh/incubator
