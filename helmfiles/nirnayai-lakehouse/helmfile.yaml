@@ -10,6 +10,9 @@ helmfiles:
       - minio:
           enabled: {{ .Values.minio.enabled }}
   - path: subhelm/trino-nginx-helmfile.yaml
+  - path: subhelm/trino-external-ingress-helmfile.yaml
+    values:
+      - host_name: {{ .Values.lakehouse.ingress.trino_hostname }}
 
 releases:
   - name: hai-mongodb
@@ -229,7 +232,7 @@ releases:
           tls: []
 
 repositories:
-  - name: mongodb
+  - name: bitnami
     url: https://charts.bitnami.com/bitnami
 
   - name: saikiran2603

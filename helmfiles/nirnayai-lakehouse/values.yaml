@@ -1,5 +1,5 @@
 lakehouse:
-  registry: "localhost:32000"
+  registry: "nirnayai"
   registryServer: "https://index.docker.io/v1/"
   tag: "latest"
   docker_username: "ninnyai"
@@ -20,6 +20,7 @@ lakehouse:
   ingress:
     enabled: false
     host_name: app.nirnay.com
+    trino_hostname: trino.nirnay.com
     tls_secret: tls-secret
 
 minio:

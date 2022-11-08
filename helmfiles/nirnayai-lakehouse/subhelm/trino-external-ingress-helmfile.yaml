@@ -1,0 +1,34 @@
+repositories:
+- name: incubator
+  url: https://charts.helm.sh/incubator
+
+releases:
+- name: trino-nginx
+  chart: incubator/raw
+  namespace: hai-trino
+  values:
+  - resources:
+    - apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: trino-ingress
+        namespace: hai-trino
+        annotations:
+          nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      spec:
+        ingressClassName: nginx
+        rules:
+          - host: {{ .Values.host_name }}
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: hai-trino
+                      port:
+                        number: 8080
+        tls:
+          - hosts:
+              - {{ .Values.host_name }}
+            secretName: lakehouse-tls-secret
