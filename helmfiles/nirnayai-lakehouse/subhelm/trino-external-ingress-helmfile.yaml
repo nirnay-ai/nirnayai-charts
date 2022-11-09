@@ -3,7 +3,7 @@ repositories:
   url: https://charts.helm.sh/incubator
 
 releases:
-- name: trino-nginx
+- name: trino-external-nginx
   chart: incubator/raw
   namespace: hai-trino
   values:
