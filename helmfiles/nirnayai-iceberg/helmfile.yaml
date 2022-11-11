@@ -1,0 +1,125 @@
+environments:
+  default:
+    values:
+    - values.yaml
+---
+
+helmfiles:
+  - path: subhelm/minio-operator-helmfile.yaml
+    values:
+      - minio:
+          enabled: {{ .Values.minio.enabled }}
+  - path: subhelm/trino-nginx-helmfile.yaml
+
+releases:
+
+  - name: minio-tenant
+    namespace: hai-minio
+    chart: minio/tenant
+    condition: minio.enabled
+    wait: true
+    waitForJobs: true
+    set:
+      - name: secrets.accessKey
+        value: {{ .Values.lakehouse.storage.config.accessKey }}
+      - name: secrets.secretKey
+        value: {{ .Values.lakehouse.storage.config.secretKey }}
+      - name: tenant.pools[0].server
+        value: 4
+      - name: tenant.pools[0].volumesPerServer
+        value: 4
+      - name: tenant.certificate.requestAutoCert
+        value: false
+      - name: log.db.volumeClaimTemplate.spec.storageClassName
+        value: ""
+      - name: tenant.log.audit.diskCapacityGB
+        value: false
+      - name: tenant.prometheus.diskCapacityGB
+        value: false
+
+  - name: hive-metastore
+    namespace: hai-trino
+    chart: saikiran2603/hive-metastore
+    set:
+      - name: hiveMetastore.s3.endpoint
+          {{ if eq .Values.minio.enabled true }}
+        value: "http://{{.Values.lakehouse.storage.minio.server}}"
+          {{ else }}
+        value: "https://{{ .Values.lakehouse.storage.s3.server }}"
+          {{ end }}
+      - name: hiveMetastore.s3.accessKey
+        value: {{ .Values.lakehouse.storage.config.accessKey }}
+      - name: hiveMetastore.s3.secretKey
+        value: {{ .Values.lakehouse.storage.config.secretKey }}
+      - name: hiveMetastore.s3.warehouseBucket
+        value: {{ .Values.lakehouse.storage.config.storage_bucket_structured }}
+
+  - name: hai-trino
+    namespace: hai-trino
+    chart: valeriano-manassero/trino
+    values:
+      - auth:
+          passwordAuth: "admin:$2y$10$42r4mc4Dv/ujHdTa.NYwdeyad9Yx16JyD2uwDIc.eRvdXmJ.2Dia6"
+        connectors:
+          iceberg.properties: |-
+            connector.name=iceberg
+            hive.metastore.uri=thrift://hive-metastore:9083
+            hive.s3.aws-access-key={{ .Values.lakehouse.storage.config.accessKey }}
+            hive.s3.aws-secret-key={{ .Values.lakehouse.storage.config.secretKey }}
+              {{ if eq .Values.minio.enabled true }}
+            hive.s3.endpoint={{.Values.lakehouse.storage.minio.server}}
+            hive.s3.ssl.enabled=false
+              {{ else }}
+            hive.s3.endpoint={{.Values.lakehouse.storage.s3.server}}
+            hive.s3.ssl.enabled=true
+              {{ end }}
+            hive.s3.path-style-access=true
+    set:
+      - name: image.repository
+        value: 'trinodb/trino'
+      - name: image.tag
+        value: 'latest'
+      - name: worker.replicas
+        value: 3
+      - name: worker.autoscaler.enabled
+        value: true
+      - name: worker.autoscaler.maxReplicas
+        value: 5
+      - name: worker.autoscaler.targetCPUUtilizationPercentage
+        value: 50
+      - name: config.general.processForwarded
+        value: true
+      - name: config.general.authenticationType
+        value: "PASSWORD"
+      - name: config.general.internalCommunicationSharedSecret
+        value: "test123"
+      - name: ingress.enabled
+        value: false
+
+repositories:
+  - name: bitnami
+    url: https://charts.bitnami.com/bitnami
+
+  - name: saikiran2603
+    url: https://saikiran2603.github.io/helm-charts
+
+  - name: valeriano-manassero
+    url: https://valeriano-manassero.github.io/helm-charts
+
+  - name: grafana
+    url: https://grafana.github.io/helm-charts
+
+  - name: superset
+    url: https://apache.github.io/superset
+
+  - name: nirnayai-charts
+    url: https://nirnay-ai.github.io/nirnayai-charts/
+
+  - name: minio
+    url: https://operator.min.io/
+
+  - name: oauth2-proxy
+    url: https://oauth2-proxy.github.io/manifests/
+
+  - name: incubator
+    url: https://charts.helm.sh/incubator
