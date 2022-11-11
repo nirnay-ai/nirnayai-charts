@@ -52,17 +52,17 @@ releases:
     namespace: hai-trino
     chart: saikiran2603/hive-metastore
     set:
-      - name: s3.endpoint
+      - name: hiveMetastore.s3.endpoint
           {{ if eq .Values.minio.enabled true }}
         value: "http://{{.Values.lakehouse.storage.minio.server}}"
           {{ else }}
         value: "https://{{ .Values.lakehouse.storage.s3.server }}"
           {{ end }}
-      - name: s3.accessKey
+      - name: hiveMetastore.s3.accessKey
         value: {{ .Values.lakehouse.storage.config.accessKey }}
-      - name: s3.secretKey
+      - name: hiveMetastore.s3.secretKey
         value: {{ .Values.lakehouse.storage.config.secretKey }}
-      - name: s3.warehouseBucket
+      - name: hiveMetastore.s3.warehouseBucket
         value: {{ .Values.lakehouse.storage.config.storage_bucket_structured }}
 
   - name: hai-trino

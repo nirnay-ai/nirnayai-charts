@@ -1,5 +1,5 @@
 lakehouse:
-  registry: "nirnayai"
+  registry: "localhost:32000"
   registryServer: "https://index.docker.io/v1/"
   tag: "latest"
   docker_username: "ninnyai"
