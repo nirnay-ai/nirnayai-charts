@@ -47,6 +47,10 @@ releases:
         value: false
       - name: tenant.prometheus.diskCapacityGB
         value: false
+      - name: tenant.buckets[0]
+        value: lakehouse-structured
+      - name: tenant.buckets[1]
+        value: lakehouse-unstructured
 
   - name: hive-metastore
     namespace: hai-trino
@@ -70,7 +74,9 @@ releases:
     chart: valeriano-manassero/trino
     values:
       - auth:
-          passwordAuth: "admin:$2y$10$42r4mc4Dv/ujHdTa.NYwdeyad9Yx16JyD2uwDIc.eRvdXmJ.2Dia6"
+          passwordAuth: |- 
+            admin:$2y$10$42r4mc4Dv/ujHdTa.NYwdeyad9Yx16JyD2uwDIc.eRvdXmJ.2Dia6
+            admin2:$2y$10$42r4mc4Dv/ujHdTa.NYwdeyad9Yx16JyD2uwDIc.eRvdXmJ.2Dia6
         connectors:
           hive.properties: |-
             connector.name=hive
@@ -104,6 +110,62 @@ releases:
             hive.s3.ssl.enabled=true
               {{ end }}
             hive.s3.path-style-access=true
+        accessControl:
+          type: configmap
+          rules:
+            rules.json: |-
+              {
+               "catalogs": [
+                 {
+                   "user": "admin",
+                   "catalog": ".*",
+                   "allow": "all"
+                 },
+                 {
+                   "group": "finance|human_resources",
+                   "catalog": "postgres",
+                   "allow": true
+                 },
+                 {
+                   "catalog": "hive",
+                   "allow": "all"
+                 },
+                 {
+                   "user": "alice",
+                   "catalog": "postgresql",
+                   "allow": "read-only"
+                 },
+                 {
+                   "catalog": "system",
+                   "allow": "none"
+                 }
+               ],
+               "schemas": [
+                 {
+                   "user": "admin",
+                   "schema": ".*",
+                   "owner": true
+                 },
+                 {
+                   "user": "guest",
+                   "owner": false
+                 },
+                 {
+                   "catalog": "default",
+                   "schema": "default",
+                   "owner": true
+                 }
+               ],
+              "tables": [
+                {
+                  "catalog": "default",
+                  "schema": "hr",
+                  "table": "employee",
+                  "privileges": ["SELECT"],
+                  "user": "banned_user"
+                }
+              ]
+              }
     set:
       - name: image.repository
         value: 'trinodb/trino'
