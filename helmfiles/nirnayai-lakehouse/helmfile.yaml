@@ -30,6 +30,12 @@ releases:
     condition: minio.enabled
     wait: true
     waitForJobs: true
+    values:
+      - tenant:
+          buckets:
+            - name: {{ .Values.lakehouse.storage.config.storage_bucket_structured }}
+            - name: {{ .Values.lakehouse.storage.config.storage_bucket_unstructured }}
+            - name: {{ .Values.lakehouse.storage.config.storage_bucket_notebooks }}
     set:
       - name: secrets.accessKey
         value: {{ .Values.lakehouse.storage.config.accessKey }}
@@ -47,10 +53,6 @@ releases:
         value: false
       - name: tenant.prometheus.diskCapacityGB
         value: false
-      - name: tenant.buckets[0]
-        value: lakehouse-structured
-      - name: tenant.buckets[1]
-        value: lakehouse-unstructured
 
   - name: hive-metastore
     namespace: hai-trino
@@ -115,56 +117,32 @@ releases:
           rules:
             rules.json: |-
               {
-               "catalogs": [
-                 {
-                   "user": "admin",
-                   "catalog": ".*",
-                   "allow": "all"
-                 },
-                 {
-                   "group": "finance|human_resources",
-                   "catalog": "postgres",
-                   "allow": true
-                 },
-                 {
-                   "catalog": "hive",
-                   "allow": "all"
-                 },
-                 {
-                   "user": "alice",
-                   "catalog": "postgresql",
-                   "allow": "read-only"
-                 },
-                 {
-                   "catalog": "system",
-                   "allow": "none"
-                 }
-               ],
-               "schemas": [
-                 {
-                   "user": "admin",
-                   "schema": ".*",
-                   "owner": true
-                 },
-                 {
-                   "user": "guest",
-                   "owner": false
-                 },
-                 {
-                   "catalog": "default",
-                   "schema": "default",
-                   "owner": true
-                 }
-               ],
-              "tables": [
-                {
-                  "catalog": "default",
-                  "schema": "hr",
-                  "table": "employee",
-                  "privileges": ["SELECT"],
-                  "user": "banned_user"
-                }
-              ]
+                  "catalogs": [
+                      {
+                          "allow": "all",
+                          "catalog": ".*",
+                          "user": "admin"
+                      }
+                  ],
+                  "schemas": [
+                      {
+                          "owner": true,
+                          "schema": ".*",
+                          "user": "admin"
+                      }
+                  ],
+                  "tables": [
+                      {
+                          "user": "admin",
+                          "privileges": [
+                              "SELECT",
+                              "INSERT",
+                              "DELETE",
+                              "UPDATE",
+                              "OWNERSHIP"
+                          ]
+                      }
+                  ]
               }
     set:
       - name: image.repository
