@@ -1,5 +1,5 @@
 lakehouse:
-  registry: "localhost:32000"
+  registry: "nirnayai"
   registryServer: "https://index.docker.io/v1/"
   tag: "latest"
   docker_username: "ninnyai"
@@ -43,6 +43,8 @@ oauth2Proxy:
     extraArgs:
       provider: github
       scope: "user:email"
+      set-xauthrequest: true
+      set-authorization-header: true
 
     image:
       repository: "quay.io/oauth2-proxy/oauth2-proxy"
