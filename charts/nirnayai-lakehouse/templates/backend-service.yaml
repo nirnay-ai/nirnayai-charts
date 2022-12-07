@@ -1,41 +1,41 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: api-data-sources
+  name: api-lakehouse-backend
   namespace: {{ .Values.platform_namespace }}
   labels:
-    app: api-data-sources
+    app: api-lakehouse-backend
 spec:
   ports:
   - port: 8080
   selector:
-    app: api-data-sources
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: api-lakehouse
-  namespace: {{ .Values.platform_namespace }}
-  labels:
-    app: api-lakehouse
-spec:
-  ports:
-  - port: 8080
-  selector:
-    app: api-lakehouse
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: api-log-manager
-  namespace: {{ .Values.platform_namespace }}
-  labels:
-    app: api-log-manager
-spec:
-  ports:
-  - port: 8080
-  selector:
-    app: api-log-manager
+    app: api-lakehouse-backend
+#---
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: api-lakehouse
+#  namespace: {{ .Values.platform_namespace }}
+#  labels:
+#    app: api-lakehouse
+#spec:
+#  ports:
+#  - port: 8080
+#  selector:
+#    app: api-lakehouse
+#---
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: api-log-manager
+#  namespace: {{ .Values.platform_namespace }}
+#  labels:
+#    app: api-log-manager
+#spec:
+#  ports:
+#  - port: 8080
+#  selector:
+#    app: api-log-manager
 ---
 apiVersion: v1
 kind: Service
