@@ -254,41 +254,41 @@ releases:
       - name: prometheus.server.persistentVolume.enabled
         value: true
 
-  - name: superset
-    namespace: hai-superset
-    chart: superset/superset
-    values:
-      - bootstrapScript: |
-          #!/bin/bash
-          pip install clickhouse-driver>=0.2.0 \
-            clickhouse-sqlalchemy>=0.1.6 \
-            sqlalchemy-trino && \
-          if [ ! -f ~/bootstrap ]; then echo "Running Superset with uid 0" > ~/bootstrap; fi
-      - extraConfigs:
-          import_datasources.yaml: |
-            databases:
-            - allow_file_upload: true
-              allow_ctas: true
-              allow_cvas: true
-              database_name: lakehouse
-              sqlalchemy_uri: trino://admin:admin@trino.nirnay.com:443/hive/default
-              tables: []
-              extra: "{\"engine_params\": {\"connect_args\": {\"verify\": false}}}"
-
-      - ingress:
-          enabled: true
-          ingressClassName: nginx
-          annotations:
-            # kubernetes.io/tls-acme: "true"
-            # Extend timeout to allow long running queries.
-             nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
-             nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-             nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
-          path: /
-          pathType: ImplementationSpecific
-          hosts:
-            - superset.nirnay.com
-          tls: []
+#  - name: superset
+#    namespace: hai-superset
+#    chart: superset/superset
+#    values:
+#      - bootstrapScript: |
+#          #!/bin/bash
+#          pip install clickhouse-driver>=0.2.0 \
+#            clickhouse-sqlalchemy>=0.1.6 \
+#            sqlalchemy-trino && \
+#          if [ ! -f ~/bootstrap ]; then echo "Running Superset with uid 0" > ~/bootstrap; fi
+#      - extraConfigs:
+#          import_datasources.yaml: |
+#            databases:
+#            - allow_file_upload: true
+#              allow_ctas: true
+#              allow_cvas: true
+#              database_name: lakehouse
+#              sqlalchemy_uri: trino://admin:admin@trino.nirnay.com:443/hive/default
+#              tables: []
+#              extra: "{\"engine_params\": {\"connect_args\": {\"verify\": false}}}"
+#
+#      - ingress:
+#          enabled: true
+#          ingressClassName: nginx
+#          annotations:
+#            # kubernetes.io/tls-acme: "true"
+#            # Extend timeout to allow long running queries.
+#             nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+#             nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+#             nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+#          path: /
+#          pathType: ImplementationSpecific
+#          hosts:
+#            - superset.nirnay.com
+#          tls: []
 
 repositories:
   - name: bitnami
