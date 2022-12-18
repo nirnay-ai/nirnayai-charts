@@ -18,6 +18,7 @@ releases:
   - name: hai-mongodb
     namespace: hai-mongodb
     chart: bitnami/mongodb
+    version: 6.0.3
     set:
     - name: architecture
       value: replicaset
@@ -27,6 +28,7 @@ releases:
   - name: minio-tenant
     namespace: hai-minio
     chart: minio/tenant
+    version: 4.5.5
     condition: minio.enabled
     wait: true
     waitForJobs: true
@@ -57,6 +59,7 @@ releases:
   - name: hive-metastore
     namespace: hai-trino
     chart: saikiran2603/hive-metastore
+    version: 0.3.2
     set:
       - name: hiveMetastore.s3.endpoint
           {{ if eq .Values.minio.enabled true }}
@@ -74,6 +77,7 @@ releases:
   - name: hai-trino
     namespace: hai-trino
     chart: valeriano-manassero/trino
+    version: 2.5.2
     values:
       - auth:
           passwordAuth: |- 
@@ -194,6 +198,7 @@ releases:
 
   - name: oauth2
     chart: oauth2-proxy/oauth2-proxy
+    version: 6.5.0
     condition: oauth2Proxy.enabled
     namespace: oauth2
     values:
@@ -257,6 +262,7 @@ releases:
   - name: superset
     namespace: hai-superset
     chart: superset/superset
+    version: 0.7.7
     condition: superset.enabled
     values:
       - bootstrapScript: |
