@@ -244,7 +244,7 @@ releases:
   - name: loki
     namespace: loki
     chart: grafana/loki-stack
-    version: 2.6.0
+    version: 2.8.8
     set:
       - name: fluent-bit.enabled
         value: true
@@ -254,10 +254,10 @@ releases:
         value: true
       - name: prometheus.enabled
         value: true
-      - name: prometheus.alertmanager.persistentVolume.enabled
-        value: true
-      - name: prometheus.server.persistentVolume.enabled
-        value: true
+#      - name: prometheus.alertmanager.persistentVolume.enabled
+#        value: true
+#      - name: prometheus.server.persistentVolume.enabled
+#        value: true
 
   - name: superset
     namespace: hai-superset
