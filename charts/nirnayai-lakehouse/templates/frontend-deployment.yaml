@@ -38,6 +38,7 @@ spec:
       labels:
         app: ui-container
     spec:
+      serviceAccountName: hai-service-account
       containers:
         - name: ui-container
           image: "{{ .Values.registryCredentials.registry }}/ui-container:{{ .Values.registryCredentials.tag }}"
