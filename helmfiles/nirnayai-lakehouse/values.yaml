@@ -26,6 +26,8 @@ lakehouse:
 minio:
   enabled: true
 
+superset:
+  enabled: false
 
 oauth2Proxy:
   enabled: true
