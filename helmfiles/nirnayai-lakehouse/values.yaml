@@ -41,6 +41,8 @@ oauth2Proxy:
       clientID: "dbf872b25c20124583a7"
       clientSecret: "fe5739a3b07cabaa9ad17cc62c62f3ea8e0e9885"
       cookieSecret: "-1-DzbWpd3Mqu47DrqeYPKDSbSlOuMK8RifaQW3Kcvw="
+#      configFile: |-
+#        email_domains = [ "gmail.com" ]
 
     extraArgs:
       provider: github
