@@ -1,5 +1,5 @@
 lakehouse:
-  registry: "localhost:32000"
+  registry: "nirnayai"
   registryServer: "https://index.docker.io/v1/"
   tag: "latest"
   docker_username: "ninnyai"
@@ -12,11 +12,11 @@ lakehouse:
     s3:
       server: "s3.amazonaws.com"
     config:
-      storage_bucket_structured: "lakehouse-structured"
+      storage_bucket_structured: "nirnayailakehouse-structured"
       storage_bucket_unstructured: "lakehouse-unstructured"
       storage_bucket_notebooks: "lakehouse-notebooks"
-      accessKey: "AKIAYFVPBHBUJBGZFQFX"
-      secretKey: "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"
+      accessKey: "AKIAQZKFPACXSPH2LBAW"
+      secretKey: "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"
   ingress:
     enabled: false
     host_name: app.nirnay.com
@@ -41,6 +41,8 @@ oauth2Proxy:
       clientID: "dbf872b25c20124583a7"
       clientSecret: "fe5739a3b07cabaa9ad17cc62c62f3ea8e0e9885"
       cookieSecret: "-1-DzbWpd3Mqu47DrqeYPKDSbSlOuMK8RifaQW3Kcvw="
+#      configFile: |-
+#        email_domains = [ "gmail.com" ]
 
     extraArgs:
       provider: github
