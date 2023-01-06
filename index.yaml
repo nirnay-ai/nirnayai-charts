@@ -1,5 +1,16 @@
 apiVersion: v1
 entries:
+  di-platform:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2023-01-06T07:00:34.593406305Z"
+    description: A Helm chart for Kubernetes
+    digest: dfe95a27343ed2d586ddf0276a82b1c7d29ddf8306a30a53021eba46ab2aaaf6
+    name: di-platform
+    type: application
+    urls:
+    - https://github.com/nirnay-ai/nirnayai-charts/releases/download/di-platform-0.1.0/di-platform-0.1.0.tgz
+    version: 0.1.0
   nirnayai-lakehouse:
   - apiVersion: v2
     appVersion: 1.16.0
@@ -71,4 +82,4 @@ entries:
     urls:
     - https://github.com/nirnay-ai/nirnayai-charts/releases/download/nirnayai-lakehouse-0.1.0/nirnayai-lakehouse-0.1.0.tgz
     version: 0.1.0
-generated: "2022-12-20T11:09:29.518996229Z"
+generated: "2023-01-06T07:00:34.593427706Z"
