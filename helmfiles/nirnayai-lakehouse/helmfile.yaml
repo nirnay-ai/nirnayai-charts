@@ -79,7 +79,33 @@ releases:
     chart: valeriano-manassero/trino
     version: 2.5.2
     values:
-      - auth:
+      - config:
+          general:
+            log:
+              trino:
+                level: INFO
+            query:
+              maxMemory: "10GB"
+              maxMemoryPerNode: "5GB"
+              maxTotalMemory: "20GB"
+          coordinator:
+            replicas: 1
+          worker:
+            replicas: 3
+            resources:
+              limits:
+                cpu: 1
+                memory: 10Gi
+              requests:
+                cpu: 1
+                memory: 10Gi
+            autoscaler:
+              enabled: true
+              maxReplicas: 5
+              targetMemoryUtilizationPercentage: 80
+#              targetCPUUtilizationPercentage: 50
+              stabilizationWindowSeconds: 300
+        auth:
           passwordAuth: |- 
             admin:$2y$10$42r4mc4Dv/ujHdTa.NYwdeyad9Yx16JyD2uwDIc.eRvdXmJ.2Dia6
             admin2:$2y$10$42r4mc4Dv/ujHdTa.NYwdeyad9Yx16JyD2uwDIc.eRvdXmJ.2Dia6
@@ -153,14 +179,16 @@ releases:
         value: 'trinodb/trino'
       - name: image.tag
         value: 'latest'
-      - name: worker.replicas
-        value: 3
-      - name: worker.autoscaler.enabled
-        value: true
-      - name: worker.autoscaler.maxReplicas
-        value: 5
-      - name: worker.autoscaler.targetCPUUtilizationPercentage
-        value: 50
+#      - name: config.coordinator.replicas
+#        value: 1
+#      - name: config.worker.replicas
+#        value: 3
+#      - name: config.worker.autoscaler.enabled
+#        value: true
+#      - name: config.worker.autoscaler.maxReplicas
+#        value: 5
+#      - name: config.worker.autoscaler.targetCPUUtilizationPercentage
+#        value: 50
       - name: config.general.processForwarded
         value: true
       - name: config.general.authenticationType
